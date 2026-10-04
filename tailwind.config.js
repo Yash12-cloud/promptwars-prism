@@ -8,7 +8,7 @@ export default {
         "pure-white": "#ffffff",
         "graphite-ink": "#0d0d0d",
         "mid-ash": "#5d5d5d",
-        hollow: "#8f8f8f",
+        hollow: "#767676", // 4.54:1 on white — WCAG AA for normal text
         hairline: "rgba(0,0,0,0.10)",
         "hover-veil": "rgba(0,0,0,0.05)",
         "ink-press": "#000000",

@@ -2,7 +2,7 @@ import { SYSTEM_ADVOCATE, SYSTEM_SKEPTIC, SYSTEM_REBUTTAL, SYSTEM_REPORT } from 
 import { ReportSchema, AdvocateSchema, SkepticSchema, RebuttalSchema } from './schemas.js';
 import { llmComplete, modelA, modelB } from './llm/index.js';
 
-function extractJson(raw: string): any {
+export function extractJson(raw: string): any {
   const cleaned = raw.replace(/```json|```/g, '').trim();
   // find first { ... last }
   const start = cleaned.indexOf('{');

@@ -166,12 +166,15 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-pure-white text-graphite-ink flex">
+      <a href="#main-content" className="skip-link">
+        Skip to content
+      </a>
       {/* Sidebar — desktop */}
       <Sidebar onSelectExample={handleSelectExample} onNewScan={reset} hasResult={!!result} activeExample={activeExample} />
 
       {/* Mobile drawer */}
       {mobileNavOpen && (
-        <div className="fixed inset-0 z-40 lg:hidden">
+        <div className="fixed inset-0 z-40 lg:hidden" role="dialog" aria-modal="true" aria-label="Examples menu">
           <button aria-label="Close menu" onClick={() => setMobileNavOpen(false)} className="absolute inset-0 bg-deep-charcoal" />
           <div className="relative h-full w-[280px] bg-sidebar-mist border-r border-hairline flex flex-col">
             <Sidebar onSelectExample={handleSelectExample} onNewScan={reset} hasResult={!!result} activeExample={activeExample} />
@@ -193,7 +196,7 @@ export default function App() {
           <span className="ml-3 text-[12px] text-hollow truncate">Two AIs · same input, opposite prompts · WS /ws → REST fallback</span>
         </div>
 
-        <main className="mx-auto w-full max-w-[768px] px-4 py-6 sm:py-8 space-y-6">
+        <main id="main-content" className="mx-auto w-full max-w-[768px] px-4 py-6 sm:py-8 space-y-6">
           <InputPanel
             decision={decision}
             reasoning={reasoning}
@@ -214,7 +217,7 @@ export default function App() {
           />
 
           {error && (
-            <div className="rounded-cards bg-pure-white border border-hairline p-4">
+            <div className="rounded-cards bg-pure-white border border-hairline p-4" role="alert">
               <div className="text-[14px] font-medium text-graphite-ink">AI error</div>
               <p className="mt-1 text-[13px] leading-[1.43] text-mid-ash break-words">{error}</p>
               <p className="mt-1 text-[12px] leading-[1.43] text-hollow">Set OPENROUTER_API_KEY in server env. REST fallback is automatic if WS fails.</p>

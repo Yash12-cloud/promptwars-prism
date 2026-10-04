@@ -255,13 +255,21 @@ npm start            # node server/dist/index.js (serves dist/ + WS/REST)
 
 **TODO (next steps):**
 - [x] **Fix `server/tsconfig.json`** — override `noEmit: false` (done; server/dist builds)
-- [ ] Add `OPENROUTER_API_KEY` (via Antideploy `POST /api/v1/ai/keys`) to server/.env for local test
-- [x] Run `npm start` locally → verified `GET /api/health` responds, static serves (LLM still unconfigured — needs key)
-- [ ] Replace default Vite `README.md` with real README (problem statement, architecture, how to run, demo script)
-- [ ] `git init`, commit, push to GitHub (required for submission)
-- [ ] Handle Antideploy `live_app_limit` (upgrade, free slot, or go static)
-- [ ] Deploy to Antideploy + verify live link + run security scan
+- [x] Add `OPENROUTER_API_KEY` (apinex) to `/.env` for local test (done; live-tested)
+- [x] Run `npm start` locally → verified `GET /api/health` responds, static serves
+- [x] Replace default Vite `README.md` with real README
+- [x] `git init`, commit, push to GitHub → https://github.com/Yash12-cloud/promptwars-prism
+- [x] Deploy to Antideploy → https://promptwars.antideploy.app (account yashnimje2005@gmail.com)
 - [ ] Record 45-sec demo: input → Scan → Report → Duel → Rebuttal → Premortem → "We never decide for you"
+
+## 14. Evaluation Hardening (2026-10-04, post-deploy)
+
+AI eval: 80.39 (Quality 86, Security 95, Efficiency 80, Testing 0, A11y 45, Alignment 98).
+- **Testing 0 → covered:** vitest (`npm test`, 18 tests, 3 files) — schemas/normalization, extractJson, prompt contracts (never-decide, strict-JSON, anti-sycophancy).
+- **A11y 45 → hardened:** muted floor raised to `#767676` (4.54:1, AA), `:focus-visible` rings, skip link, `htmlFor`/`id` + `aria-describedby` labels, `role="alert"` errors, `role="dialog"` mobile nav, `aria-busy` scan state, `prefers-reduced-motion` block.
+- **Efficiency:** removed unused `framer-motion` + `lucide-react` deps.
+- **Quality:** deleted dead files (`src/engine/ai.ts`, `src/App.css`, unused `src/assets/*`).
+- **Security 95 → tightened:** CORS allowlist (SITE_URL + localhost + *.antideploy.app) on HTTP and WS handshake (was open `cors()`).
 
 ---
 

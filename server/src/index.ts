@@ -12,7 +12,14 @@ import { llmStatus } from './llm/index.js';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 
-app.use(cors());
+const ALLOWED_ORIGINS = [process.env.SITE_URL, 'http://localhost:5173', 'http://localhost:3001'].filter(Boolean) as string[];
+app.use(cors({
+  origin: (origin, cb) => {
+    if (!origin) return cb(null, true); // same-origin / curl / health checks
+    if (ALLOWED_ORIGINS.some((o) => origin === o || origin.endsWith('.antideploy.app'))) return cb(null, true);
+    return cb(new Error('CORS: origin not allowed'));
+  },
+}));
 app.use(express.json({ limit: '1mb' }));
 
 // Health
@@ -53,7 +60,16 @@ app.use((_req, res) => {
 
 // WS
 const server = createServer(app);
-const wss = new WebSocketServer({ server, path: '/ws' });
+const wss = new WebSocketServer({
+  server,
+  path: '/ws',
+  verifyClient: (info, done) => {
+    const origin = info.origin || info.req.headers.origin;
+    if (!origin) return done(true); // same-origin / non-browser
+    if (ALLOWED_ORIGINS.some((o) => origin === o || origin.endsWith('.antideploy.app'))) return done(true);
+    return done(false, 403, 'Origin not allowed');
+  },
+});
 
 wss.on('connection', (ws) => {
   console.log('[ws] client connected');

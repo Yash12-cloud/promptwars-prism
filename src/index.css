@@ -7,7 +7,8 @@
   --color-pure-white: #ffffff;
   --color-graphite-ink: #0d0d0d;
   --color-mid-ash: #5d5d5d;
-  --color-hollow: #8f8f8f;
+  /* #767676 on #ffffff = 4.54:1 — passes WCAG AA for normal text */
+  --color-hollow: #767676;
   --color-hairline: rgba(0, 0, 0, 0.1);
   --color-hover-veil: rgba(0, 0, 0, 0.05);
   --color-ink-press: #000000;
@@ -62,4 +63,47 @@ body {
   line-height: var(--leading-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Visible keyboard focus on all interactive elements */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
+  outline: 2px solid var(--color-graphite-ink);
+  outline-offset: 2px;
+}
+
+/* Skip link: hidden until focused */
+.skip-link {
+  position: absolute;
+  left: 12px;
+  top: -48px;
+  z-index: 100;
+  background: var(--color-ink-press);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 8px 16px;
+  border-radius: 999px;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+.skip-link:focus-visible {
+  top: 12px;
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  .skip-link { transition: none; }
 }

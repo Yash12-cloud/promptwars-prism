@@ -37,10 +37,15 @@ npm install
 # OPENROUTER_BASE_URL=https://api.apinex.bond/v1
 # LLM_MODEL_A=free/gpt-6-luna
 # LLM_MODEL_B=free/glm-5.3-flash
+npm test        # vitest: 18 tests (schemas, JSON parsing, prompt contracts)
 npm run dev     # client :5173 + server :3001 (vite proxies /api + /ws)
 npm run build   # client dist + server dist
 npm start       # serves dist/ + /ws + /api on $PORT
 ```
+
+## Accessibility
+
+ChatGPT-style graphite-on-paper system, audited for: AA contrast (`#767676` muted floor), visible `:focus-visible` rings, skip-to-content link, labelled inputs (`htmlFor`/`id`, `aria-describedby`), `role="alert"` errors, `role="dialog"` mobile nav, `aria-busy` scan state, and `prefers-reduced-motion` support.
 
 ## Deploy
 

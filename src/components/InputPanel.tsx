@@ -58,38 +58,42 @@ export default function InputPanel(props: {
           </span>
         </div>
 
-        <label className="block space-y-1">
+        <label className="block space-y-1" htmlFor="prism-decision">
           <span className="text-[14px] font-medium text-graphite-ink">Decision you&apos;re considering</span>
           <input
+            id="prism-decision"
             value={decision}
             onChange={(e) => setDecision(e.target.value)}
             placeholder="e.g. Whether to accept a 6-month internship…"
+            autoComplete="off"
             className="w-full rounded-buttons border border-hairline bg-pure-white px-3 py-2 text-[14px] leading-[1.43] text-graphite-ink placeholder:text-hollow outline-none focus:border-edge-gray"
           />
         </label>
 
-        <label className="block space-y-1">
-          <span className="flex items-center gap-2 text-[14px] font-medium text-graphite-ink">
+        <div className="space-y-1">
+          <label className="flex items-center gap-2 text-[14px] font-medium text-graphite-ink" htmlFor="prism-reasoning">
             Your reasoning <span className="text-[12px] font-normal text-hollow">({reasoning.length} chars)</span>
-          </span>
+          </label>
           <textarea
+            id="prism-reasoning"
             value={reasoning}
             onChange={(e) => setReasoning(e.target.value)}
             rows={6}
+            aria-describedby="prism-reasoning-hint"
             placeholder="Why are you leaning that way? What matters most? Who influenced you? What doubts do you have?"
             className="w-full resize-none rounded-buttons border border-hairline bg-pure-white px-3 py-2.5 text-[14px] leading-[1.5] text-graphite-ink placeholder:text-hollow outline-none focus:border-edge-gray"
           />
-          <span className={`text-[12px] leading-[1.43] ${reasoning.trim().length < 40 ? 'text-hollow' : 'text-mid-ash'}`}>
+          <span id="prism-reasoning-hint" className={`text-[12px] leading-[1.43] ${reasoning.trim().length < 40 ? 'text-hollow' : 'text-mid-ash'}`}>
             {reasoning.trim().length < 40 ? 'Add at least 40 characters for a useful scan.' : 'Good — enough context for a sharp debate.'}
           </span>
-        </label>
+        </div>
 
         <div className="rounded-buttons bg-sidebar-mist border border-hairline p-3 space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <span className="text-[14px] font-medium text-graphite-ink">How confident are you?</span>
-            <span className="text-[12px] font-medium text-hollow tabular-nums">{confidence}%</span>
+            <label className="text-[14px] font-medium text-graphite-ink" htmlFor="prism-confidence">How confident are you?</label>
+            <span className="text-[12px] font-medium text-hollow tabular-nums" aria-hidden>{confidence}%</span>
           </div>
-          <input type="range" min={5} max={95} value={confidence} onChange={(e) => setConfidence(parseInt(e.target.value))} className="w-full accent-graphite-ink" />
+          <input id="prism-confidence" type="range" min={5} max={95} value={confidence} onChange={(e) => setConfidence(parseInt(e.target.value))} aria-valuetext={`${confidence} percent confident`} className="w-full accent-graphite-ink" />
           <div className="flex justify-between text-[11px] text-hollow">
             <span>Exploring</span>
             <span>Leaning</span>
@@ -102,6 +106,8 @@ export default function InputPanel(props: {
         <button
           disabled={!canScan || scanning}
           onClick={onScan}
+          aria-busy={scanning}
+          aria-live="polite"
           className="w-full inline-flex items-center justify-center gap-2 rounded-buttons bg-ink-press text-white text-[14px] font-medium h-10 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
           {scanning ? 'Scanning…' : 'Scan — start the debate'}
