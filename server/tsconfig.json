@@ -1,0 +1,18 @@
+{
+  "extends": "../tsconfig.node.json",
+  "compilerOptions": {
+    "outDir": "./dist",
+    "rootDir": "./src",
+    "module": "nodenext",
+    "target": "es2023",
+    "noEmit": false,
+    "composite": false,
+    "incremental": false,
+    "tsBuildInfoFile": null,
+    "allowImportingTsExtensions": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "erasableSyntaxOnly": false
+  },
+  "include": ["src/**/*"]
+}
