@@ -259,7 +259,7 @@ npm start            # node server/dist/index.js (serves dist/ + WS/REST)
 - [x] Run `npm start` locally → verified `GET /api/health` responds, static serves
 - [x] Replace default Vite `README.md` with real README
 - [x] `git init`, commit, push to GitHub → https://github.com/Yash12-cloud/promptwars-prism
-- [x] Deploy to Antideploy → https://promptwars.antideploy.app (account yashnimje2005@gmail.com)
+- [x] Deploy to Antideploy → https://promptwars.antideploy.app (account yashnimje2005@gmail.com) — hardened build redeployed + live-verified (health configured=true, live /api/scan returns full report + duel)
 - [ ] Record 45-sec demo: input → Scan → Report → Duel → Rebuttal → Premortem → "We never decide for you"
 
 ## 14. Evaluation Hardening (2026-10-04, post-deploy)
