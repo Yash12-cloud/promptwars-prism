@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { ReportSchema, AdvocateSchema, SkepticSchema, RebuttalSchema } from './schemas.js';
+import { ReportSchema } from './schemas.js';
 
 const validReport = {
   title: 'Accept internship',
@@ -62,27 +62,5 @@ describe('ReportSchema', () => {
 
   it('rejects too few assumptions', () => {
     expect(ReportSchema.safeParse({ ...validReport, assumptions: [] }).success).toBe(false);
-  });
-});
-
-describe('Duel schemas', () => {
-  it('accepts advocate payload', () => {
-    expect(AdvocateSchema.safeParse({ points: ['a', 'b', 'c'], verify: 'What would flip you?' }).success).toBe(true);
-  });
-
-  it('rejects advocate with one point', () => {
-    expect(AdvocateSchema.safeParse({ points: ['a'], verify: 'x' }).success).toBe(false);
-  });
-
-  it('accepts skeptic payload', () => {
-    expect(SkepticSchema.safeParse({ points: ['[Halo - Association] ...', 'x'], questions: ['q?'] }).success).toBe(true);
-  });
-
-  it('rejects skeptic without questions', () => {
-    expect(SkepticSchema.safeParse({ points: ['a', 'b'], questions: [] }).success).toBe(false);
-  });
-
-  it('accepts rebuttal payload', () => {
-    expect(RebuttalSchema.safeParse({ rebuttal: ['r1', 'r2', 'r3'] }).success).toBe(true);
   });
 });

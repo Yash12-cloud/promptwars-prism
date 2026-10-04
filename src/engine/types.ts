@@ -41,12 +41,6 @@ export interface AnalysisResult {
   confidenceNote: string;
 }
 
-export interface DuelPayload {
-  advocate: { points: string[]; verify: string };
-  skeptic: { points: string[]; questions: string[] };
-  rebuttal?: string[];
-}
-
 export interface ExampleCase {
   id: string;
   label: string;

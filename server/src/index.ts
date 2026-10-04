@@ -3,10 +3,7 @@ import express from 'express';
 import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createServer } from 'http';
-import { WebSocketServer } from 'ws';
-import { attachWsHandler } from './ws.js';
-import { runScan, runDuel, runRebuttal } from './orchestrator.js';
+import { runScan } from './orchestrator.js';
 import { llmStatus } from './llm/index.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -25,28 +22,17 @@ app.use(express.json({ limit: '1mb' }));
 // Health
 app.get('/api/health', (_req, res) => {
   const llm = llmStatus();
-  res.json({ ok: true, llm, uptime: process.uptime(), ws: '/ws' });
+  res.json({ ok: true, llm, uptime: process.uptime() });
 });
 
-// REST fallback for non-WS clients (also used for simple testing)
+// Single-model blind-spot analysis
 app.post('/api/scan', async (req, res) => {
   try {
     const { decision, reasoning, confidence } = req.body;
-    if (!reasoning) return res.status(400).json({ error:'reasoning required' });
-    const [report, duel] = await Promise.all([
-      runScan(decision||'', reasoning, confidence||70),
-      runDuel(decision||'', reasoning, confidence||70),
-    ]);
-    res.json({ report, duel: { advocate: duel.advocate, skeptic: duel.skeptic } });
-  } catch (e:any) { res.status(500).json({ error: e.message }); }
-});
-
-app.post('/api/rebuttal', async (req, res) => {
-  try {
-    const { advocate, decision, reasoning } = req.body;
-    const r = await runRebuttal(advocate, decision||'', reasoning||'');
-    res.json(r);
-  } catch (e:any) { res.status(500).json({ error: e.message }); }
+    if (!reasoning) return res.status(400).json({ error: 'reasoning required' });
+    const report = await runScan(decision || '', reasoning, confidence || 70);
+    res.json({ report });
+  } catch (e: any) { res.status(500).json({ error: e.message }); }
 });
 
 // Static client (after building dist/)
@@ -58,42 +44,11 @@ app.use((_req, res) => {
   });
 });
 
-// WS
-const server = createServer(app);
-const wss = new WebSocketServer({
-  server,
-  path: '/ws',
-  verifyClient: (info, done) => {
-    const origin = info.origin || info.req.headers.origin;
-    if (!origin) return done(true); // same-origin / non-browser
-    if (ALLOWED_ORIGINS.some((o) => origin === o || origin.endsWith('.antideploy.app'))) return done(true);
-    return done(false, 403, 'Origin not allowed');
-  },
-});
-
-wss.on('connection', (ws) => {
-  console.log('[ws] client connected');
-  attachWsHandler(ws, {
-    async onScan(decision, reasoning, confidence, emit) {
-      // report and duel in parallel, collecting deltas
-      const [report, duel] = await Promise.all([
-        runScan(decision, reasoning, confidence, emit.reportDelta),
-        runDuel(decision, reasoning, confidence, emit.duelAdvDelta, emit.duelSkepDelta),
-      ]);
-      return { report, duel };
-    },
-    async onRebuttal(advocate, decision, reasoning, onDelta) {
-      return runRebuttal(advocate, decision, reasoning, onDelta);
-    }
-  });
-  ws.on('close', ()=> console.log('[ws] client disconnected'));
-});
-
 const PORT = parseInt(process.env.PORT || '3001', 10);
-server.listen(PORT, () => {
+app.listen(PORT, () => {
   const llm = llmStatus();
   console.log(`[PRISM] listening on :${PORT}`);
   console.log(`[PRISM] client dist: ${clientDist}`);
   console.log(`[PRISM] LLM: ${llm.provider} configured=${llm.configured}`);
-  if (!llm.configured) console.log('[PRISM] WARNING: No OPENROUTER_API_KEY / GEMINI_API_KEY set — WS will error on scan. Set via Antideploy secrets or server/.env');
+  if (!llm.configured) console.log('[PRISM] WARNING: No OPENROUTER_API_KEY / GEMINI_API_KEY set — /api/scan will error. Set via Antideploy secrets or .env');
 });

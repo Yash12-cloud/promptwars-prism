@@ -60,10 +60,10 @@ export default function Sidebar({
           <div className="text-[11px] font-semibold tracking-[0.12em] uppercase text-hollow">How it works</div>
           <ol className="space-y-2 text-[13px] leading-[1.43] text-mid-ash">
             <li className="flex gap-2"><span className="text-hollow">1.</span> Describe your lean + reasons</li>
-            <li className="flex gap-2"><span className="text-hollow">2.</span> Two AIs debate it in parallel</li>
-            <li className="flex gap-2"><span className="text-hollow">3.</span> Skeptic rebuts the Advocate</li>
+            <li className="flex gap-2"><span className="text-hollow">2.</span> AI maps assumptions, biases + questions</li>
+            <li className="flex gap-2"><span className="text-hollow">3.</span> Premortem + ripple map the futures</li>
           </ol>
-          <p className="text-[12px] leading-[1.43] text-hollow">Model A: free/gpt-6-luna · Model B: free/glm-5.3-flash · WS /ws</p>
+          <p className="text-[12px] leading-[1.43] text-hollow">Single model · REST /api/scan</p>
         </div>
       </div>
 
@@ -82,8 +82,7 @@ export default function Sidebar({
           <p className="text-[13px] leading-[1.43] text-hollow">We never decide for you. We surface what you haven&apos;t questioned.</p>
         </div>
         <div className="flex items-center gap-2 text-[11px] text-hollow">
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-graphite-ink" /> WS</span>
-          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-hollow" /> REST</span>
+          <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-graphite-ink" /> REST</span>
           <span className="inline-flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-edge-gray" /> no VITE_ keys</span>
         </div>
       </div>

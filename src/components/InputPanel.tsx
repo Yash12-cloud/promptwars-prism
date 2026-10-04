@@ -1,6 +1,5 @@
 import { EXAMPLES } from '../engine/mock';
 import type { ExampleCase } from '../engine/types';
-import type { WSStatus } from '../hooks/usePrismWS';
 
 export default function InputPanel(props: {
   decision: string;
@@ -11,10 +10,8 @@ export default function InputPanel(props: {
   setConfidence: (v: number) => void;
   onScan: () => void;
   scanning: boolean;
-  wsStatus: WSStatus;
-  wsError: string | null;
 }) {
-  const { decision, reasoning, confidence, setDecision, setReasoning, setConfidence, onScan, scanning, wsStatus, wsError } = props;
+  const { decision, reasoning, confidence, setDecision, setReasoning, setConfidence, onScan, scanning } = props;
 
   const canScan = reasoning.trim().length > 40 && decision.trim().length > 5;
 
@@ -30,7 +27,7 @@ export default function InputPanel(props: {
       <div className="space-y-2">
         <h1 className="text-[24px] font-semibold leading-[1.33] tracking-normal text-graphite-ink">Don&apos;t decide. See clearly.</h1>
         <p className="text-[16px] leading-[1.5] text-mid-ash max-w-[60ch]">
-          Describe your lean and why. Two AIs debate it in parallel — the Steelman defends you, the Skeptic hunts blind spots — then the Skeptic rebuts the Steelman. We never decide for you.
+          Describe your lean and why. A single AI maps your assumptions, biases, unasked questions, and small experiments — then simulates the futures where you regret it. We never decide for you.
         </p>
         <div className="flex flex-wrap gap-2 pt-1">
           {EXAMPLES.map((ex) => (
@@ -49,12 +46,8 @@ export default function InputPanel(props: {
       <div className="rounded-cards bg-pure-white border border-hairline p-4 space-y-4">
         <div className="flex items-center justify-between gap-3">
           <span className="text-[12px] font-medium tracking-[0.08em] uppercase text-hollow">Composer</span>
-          <span
-            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-medium ${
-              wsError ? 'bg-pure-white border-hairline text-graphite-ink' : wsStatus === 'ready' ? 'bg-sidebar-mist border-hairline text-graphite-ink' : 'bg-pure-white border-hairline text-hollow'
-            }`}
-          >
-            {wsError ? 'WS error · REST fallback' : wsStatus === 'streaming' ? 'Streaming…' : wsStatus === 'ready' ? 'WS ready' : wsStatus === 'connecting' ? 'Connecting…' : 'Production · WS + REST'}
+          <span className="inline-flex items-center rounded-full border border-hairline bg-sidebar-mist px-2.5 py-1 text-[11px] font-medium text-graphite-ink">
+            REST API
           </span>
         </div>
 
@@ -84,7 +77,7 @@ export default function InputPanel(props: {
             className="w-full resize-none rounded-buttons border border-hairline bg-pure-white px-3 py-2.5 text-[14px] leading-[1.5] text-graphite-ink placeholder:text-hollow outline-none focus:border-edge-gray"
           />
           <span id="prism-reasoning-hint" className={`text-[12px] leading-[1.43] ${reasoning.trim().length < 40 ? 'text-hollow' : 'text-mid-ash'}`}>
-            {reasoning.trim().length < 40 ? 'Add at least 40 characters for a useful scan.' : 'Good — enough context for a sharp debate.'}
+            {reasoning.trim().length < 40 ? 'Add at least 40 characters for a useful scan.' : 'Good — enough context for a sharp analysis.'}
           </span>
         </div>
 
@@ -101,8 +94,6 @@ export default function InputPanel(props: {
           </div>
         </div>
 
-        {wsError && <p className="text-[13px] leading-[1.43] text-hollow">WS error: {wsError} — REST fallback will be used.</p>}
-
         <button
           disabled={!canScan || scanning}
           onClick={onScan}
@@ -110,9 +101,9 @@ export default function InputPanel(props: {
           aria-live="polite"
           className="w-full inline-flex items-center justify-center gap-2 rounded-buttons bg-ink-press text-white text-[14px] font-medium h-10 hover:opacity-90 disabled:opacity-40 disabled:cursor-not-allowed transition"
         >
-          {scanning ? 'Scanning…' : 'Scan — start the debate'}
+          {scanning ? 'Scanning…' : 'Scan for blind spots'}
         </button>
-        <p className="text-center text-[12px] leading-[1.43] text-hollow">Two models in parallel (A defends, B attacks), then B rebuts A.</p>
+        <p className="text-center text-[12px] leading-[1.43] text-hollow">One model analyzes your reasoning end-to-end. Keys live server-side.</p>
       </div>
     </div>
   );

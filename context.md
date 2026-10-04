@@ -50,11 +50,10 @@
 - Cite: Pronin et al. (2002) Bias Blind Spot, Dimara et al. 5 flavors, Klein Premortem (HBR 2007), WRAP (Heath), Socratic Questioning, Sharma et al. 2024 sycophancy, Stanford HAI 2024 Adversarial Collaboration
 - Dimara 5 flavors used as classifier: **Association · Baseline · Inertia · Outcome · Self-Perspective**
 
-**4 screens in the app:**
+**3 screens in the app (single-model REST, no debate/WS):**
 1. **Report** — assumptions (5, with flavor + risk + test), bias tags, Socratic questions, reframes, experiments, calibration note
-2. **Duel** — Steelman (Advocate) vs Skeptic split-screen, parallel WS streaming, rebuttal round where Skeptic attacks Advocate
-3. **Premortem** — 3 future-regret narratives + ripple map (SVG graph of 1st/2nd/3rd order consequences)
-4. Landing hero within same page — input card + 3 example buttons
+2. **Premortem** — 3 future-regret narratives + ripple map (SVG graph of 1st/2nd/3rd order consequences)
+3. Landing hero within same page — input card + 3 example buttons
 
 ---
 
@@ -63,20 +62,18 @@
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │ Browser: React 19 + Vite + Tailwind 3 (client/dist)         │
-│   ├─ src/App.tsx          (page, tabs: Report|Duel|Premortem)│
-│   ├─ components/ (Header, InputPanel, Report, Duel, Premortem)│
-│   ├─ hooks/usePrismWS.ts (WS client)                        │
-│   └─ engine/ (mock.ts kept for EXAMPLES only, types.ts)     │
+│   ├─ src/App.tsx          (page, tabs: Report|Premortem)     │
+│   ├─ components/ (Header, Sidebar, InputPanel, Report, Premortem)│
+│   └─ engine/ (mock.ts holds EXAMPLES only, types.ts)        │
 └──────────────────────────┬──────────────────────────────────┘
-                           │ wss:// (path /ws)  + REST /api
+                           │ REST: POST /api/scan
 ┌──────────────────────────▼──────────────────────────────────┐
-│ Node Server: Express 5 + ws + zod (server/src)              │
-│   ├─ index.ts         Express app + WS /ws + REST /api/*    │
-│   ├─ ws.ts            WS protocol router (scan:start, ...)  │
-│   ├─ orchestrator.ts  runScan / runDuel / runRebuttal       │
-│   ├─ prompts.ts       Anti-sycophancy system prompts        │
+│ Node Server: Express 5 + zod (server/src)                  │
+│   ├─ index.ts         Express app + /api/health + /api/scan │
+│   ├─ orchestrator.ts  runScan (single-model, validated)    │
+│   ├─ prompts.ts       REPORT system prompt (never-decide)   │
 │   ├─ schemas.ts       Zod validation for LLM JSON           │
-│   └─ llm/             openrouter.ts (streaming adapter),    │
+│   └─ llm/             openrouter.ts adapter,               │
 │                       index.ts (provider router)            │
 └──────────────────────────┬──────────────────────────────────┘
                            │ HTTPS
@@ -94,8 +91,8 @@
 
 ```
 /home/yash/Downloads/PromptWars/
-├── package.json              # scripts below; deps: express, ws, zod, cors, dotenv, framer-motion, lucide-react
-├── vite.config.ts            # proxy /api + /ws → localhost:3001
+├── package.json              # deps: express, cors, dotenv, zod (no ws); scripts: dev/build/start/test
+├── vite.config.ts            # proxy /api → localhost:3001
 ├── tsconfig.json             # references app + node
 ├── tsconfig.app.json         # client (src), noEmit
 ├── tsconfig.node.json        # vite.config.ts, noEmit
@@ -113,29 +110,24 @@
 │   ├── App.tsx               # main page, WS+REST fallback logic, tabs, premortem/duel/report wiring
 │   ├── index.css             # Tailwind + fonts (Fraunces, Instrument Sans, JetBrains Mono)
 │   ├── components/
-│   │   ├── Header.tsx        # logo + reset + tagline
-│   │   ├── InputPanel.tsx    # hero + example buttons + textarea + confidence slider + WS status badge
+│   │   ├── Header.tsx        # top bar
+│   │   ├── Sidebar.tsx       # examples + how-it-works + footer
+│   │   ├── InputPanel.tsx    # hero + composer + confidence slider
 │   │   ├── Report.tsx        # assumptions/biases/socratic/frames/experiments cards
-│   │   ├── Duel.tsx          # Steelman vs Skeptic split-screen + rebuttal card + vote footer
 │   │   └── Premortem.tsx     # premortem cards + SVG ripple map
-│   ├── hooks/usePrismWS.ts   # WS client hook: connect, ensureHandlers, streaming buffers
 │   └── engine/
-│       ├── mock.ts           # EXAMPLES only (3 prefilled decisions); mock pools remain but unused
-│       ├── types.ts          # Shared TS types
-│       └── ai.ts             # DEPRECATED — says keys removed, do not import
+│       ├── mock.ts           # EXAMPLES only (composer prefill)
+│       └── types.ts          # Shared TS types
 │
-└── server/                   # SERVER (Node + Express + WS)
-    ├── tsconfig.json         # extends ../tsconfig.node.json — **BUG: inherits noEmit:true, must override**
-    ├── dist/                 # EMPTY (tsc emits nothing due to noEmit inherited) — NEEDS FIX
-    └── src/
-        ├── index.ts          # Express app: /api/health, /api/scan, /api/rebuttal, static dist, /ws
-        ├── ws.ts             # WS protocol: scan:start, rebuttal:run → report:delta, duel:*:delta, scan:complete, rebuttal:complete
-        ├── orchestrator.ts   # runScan (stream report), runDuel (parallel advocate+skeptic, streamed), runRebuttal
-        ├── prompts.ts        # SYSTEM_BASE, ADVOCATE, SKEPTIC, REBUTTAL, REPORT (anti-sycophancy, strict JSON)
-        ├── schemas.ts        # Zod: ReportSchema, AdvocateSchema, SkepticSchema, RebuttalSchema
-        └── llm/
-            ├── openrouter.ts # OpenRouter streaming adapter + Gemini REST fallback
-            └── index.ts      # llmComplete() router: openrouter > gemini > throw
+└── server/                   # SERVER (Node + Express, REST only)
+│   ├── index.ts          # Express app: /api/health, /api/scan, static dist
+│   ├── orchestrator.ts   # runScan (single-model) + extractJson
+│   ├── prompts.ts        # SYSTEM_BASE + SYSTEM_REPORT (never-decide, strict JSON)
+│   ├── schemas.ts        # Zod: ReportSchema (+ normalization preprocessors)
+│   ├── *.test.ts         # vitest: schemas, parse, prompt contracts (11 tests)
+│   └── llm/
+│       ├── openrouter.ts # OpenRouter-compat adapter (apinex) + Gemini REST fallback
+│       └── index.ts      # llmComplete() router: openrouter > gemini > throw
 ```
 
 ---
@@ -167,8 +159,8 @@
 **Provider (updated 2026-10-04):** apinex OpenRouter-compatible endpoint
 - Base URL: `https://api.apinex.bond/v1`
 - Key: `sk-apx4c0942017dbc530474e82158e5f9a0415918cf79cea498e` (in `/.env`, gitignored, mode 0600)
-- **Model A** (Report + Steelman/Advocate): `free/gpt-6-luna`
-- **Model B** (Skeptic + Rebuttal): `free/glm-5.3-flash`
+- **Single model** (report analysis): `free/gpt-6-luna` (via `LLM_MODEL`, falls back to legacy `LLM_MODEL_A`)
+- **NOTE: the 2-AI debate (Steelman vs Skeptic) + WebSocket layer was removed per request — single-model REST (`POST /api/scan`) only.** Deleted: `server/src/ws.ts`, `src/components/Duel.tsx`, `src/hooks/usePrismWS.ts`, duel prompts/schemas, `ws` dep.
 
 **Fallbacks (older, still in code):** direct `GEMINI_API_KEY`, `OPENAI_API_KEY`
 
@@ -187,27 +179,15 @@ PORT=3001
 **Tested live:** `POST /api/scan` returns full report (5 assumptions, 3 biases, 5 socratic, 6 ripple nodes) + advocate (steelman) + skeptic (Dimara bias tags). Verified 2026-10-04.
 
 **Key prompts (server/src/prompts.ts):**
-- STEELMAN: 3 bullets why lean is RIGHT + 1 verify question, strict JSON
-- SKEPTIC: MUST disagree with ≥2 assumptions, map to [Bias - Dimara Flavor] with quote, strict JSON
-- REBUTTAL: Skeptic rebuts Advocate's points, 3 bullets
 - REPORT: full blind-spot JSON (assumptions, biases, socratic, frames, experiments, premortems, ripples, confidenceNote)
 
 ---
 
 ## 8. Runtime Protocol
 
-**WS (`/ws`):**
-- Client → `scan:start {decision, reasoning, confidence}`
-- Server → `hello`, `scan:started`, `report:delta`, `duel:advocate:delta`, `duel:skeptic:delta`, `scan:complete {report, duel}`, `error`
-- Client → `rebuttal:run {advocate, decision, reasoning}`
-- Server → `rebuttal:started`, `rebuttal:delta`, `rebuttal:complete {rebuttal}`
-
-**REST fallback:**
-- `POST /api/scan` → `{report, duel}`
-- `POST /api/rebuttal` → `{rebuttal}`
-- `GET /api/health` → `{ok, llm: {provider, configured}, uptime, ws}`
-
-**Parallelism:** `runScan` + `runDuel` run in `Promise.all` — report + advocate + skeptic all stream concurrently. Gemini adapter fakes streaming (12-char chunks, 12ms). OpenRouter adapter streams natively.
+**REST:**
+- `POST /api/scan` → `{report}`
+- `GET /api/health` → `{ok, llm: {provider, configured, model}, uptime}`
 
 ---
 
@@ -265,17 +245,17 @@ npm start            # node server/dist/index.js (serves dist/ + WS/REST)
 ## 14. Evaluation Hardening (2026-10-04, post-deploy)
 
 AI eval: 80.39 (Quality 86, Security 95, Efficiency 80, Testing 0, A11y 45, Alignment 98).
-- **Testing 0 → covered:** vitest (`npm test`, 18 tests, 3 files) — schemas/normalization, extractJson, prompt contracts (never-decide, strict-JSON, anti-sycophancy).
+- **Testing 0 → covered:** vitest (`npm test`, 11 tests, 3 files) — schemas/normalization, extractJson, prompt contracts (never-decide, strict-JSON, full section list).
 - **A11y 45 → hardened:** muted floor raised to `#767676` (4.54:1, AA), `:focus-visible` rings, skip link, `htmlFor`/`id` + `aria-describedby` labels, `role="alert"` errors, `role="dialog"` mobile nav, `aria-busy` scan state, `prefers-reduced-motion` block.
 - **Efficiency:** removed unused `framer-motion` + `lucide-react` deps.
 - **Quality:** deleted dead files (`src/engine/ai.ts`, `src/App.css`, unused `src/assets/*`).
-- **Security 95 → tightened:** CORS allowlist (SITE_URL + localhost + *.antideploy.app) on HTTP and WS handshake (was open `cors()`).
+- **Security 95 → tightened:** CORS allowlist (SITE_URL + localhost + *.antideploy.app) on the HTTP layer (was open `cors()`).
 
 ---
 
 ## 12. Demo Script (45 sec)
 
-> "This is PRISM. You paste your reasoning — here's a student's internship case. PRISM never decides for you. It shows you unstated assumptions, biases like Halo Effect and Optimism Bias, Socratic questions you haven't asked, and small experiments to run. Two AIs then debate your reasoning — the Steelman defends it, the Skeptic attacks it with Dimara bias tags, and the Skeptic rebuts the Steelman. Finally, a premortem simulates three futures where you regret it, plus a ripple map of second-order consequences. Your job: think clearer, not outsource the choice."
+> "This is PRISM. You paste your reasoning — here's a student's internship case. PRISM never decides for you. It shows you unstated assumptions, biases like Halo Effect and Optimism Bias, Socratic questions you haven't asked, and small experiments to run. Finally, a premortem simulates three futures where you regret it, plus a ripple map of second-order consequences. Your job: think clearer, not outsource the choice."
 
 ---
 

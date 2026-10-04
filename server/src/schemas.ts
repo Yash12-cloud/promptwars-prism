@@ -71,10 +71,4 @@ export const ReportSchema = z.object({
   confidenceNote: z.string(),
 });
 
-export const AdvocateSchema = z.object({ points: z.array(z.string()).min(2), verify: z.string() });
-export const SkepticSchema = z.object({ points: z.array(z.string()).min(2), questions: z.array(z.string()).min(1) });
-export const RebuttalSchema = z.object({ rebuttal: z.array(z.string()).min(2) });
-
 export type Report = z.infer<typeof ReportSchema>;
-export type Advocate = z.infer<typeof AdvocateSchema>;
-export type Skeptic = z.infer<typeof SkepticSchema>;
